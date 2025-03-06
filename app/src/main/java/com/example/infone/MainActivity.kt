@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
         Config.loadConfig(applicationContext)
         createNotificationChannel()
         //createWorkRequest(preferences.getNotifTime(), 24)
-        notificationScheduler.scheduleNotification(preferences.getNotificationTime(), 0)
+        notificationScheduler.scheduleNotification(preferences.getNotificationHour(), preferences.getNotificationMinute())
 
         setContent {
             AppUI()
@@ -169,7 +169,7 @@ class MainActivity : ComponentActivity() {
                         if (selectedTime != newTime) {
                             selectedTime = newTime
                             Log.d("MainActivity", "New time selected: $newTime")
-                            preferences.saveNotificationTime(hour)
+                            preferences.saveNotificationTime(hour, minute)
                             //WorkManager.getInstance(context).cancelWorkById(workId)
                             //createWorkRequest(hourOfDay, minute)
                             notificationScheduler.rescheduleNotification(hour, minute)

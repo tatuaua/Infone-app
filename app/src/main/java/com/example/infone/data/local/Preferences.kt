@@ -9,7 +9,8 @@ class Preferences(private val context: Context) {
     companion object {
         const val PREFS_NAME = "InfonePrefs"
         const val IDS_PREF = "InfoneIds"
-        const val NOTIF_TIME_PREF = "InfoneTime"
+        const val NOTIF_HOUR_PREF = "InfoneNotifHour"
+        const val NOTIF_MINUTE_PREF = "InfoneNotifMinute"
     }
 
     fun addId(id: Int) {
@@ -40,17 +41,22 @@ class Preferences(private val context: Context) {
         return ids.map { it.toInt() }
     }
 
-    fun saveNotificationTime(time: Int) {
+    fun saveNotificationTime(hour: Int, minute: Int) {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         WorkManager.getInstance(context).cancelAllWork()
-        editor.putInt(NOTIF_TIME_PREF, time)
+        editor.putInt(NOTIF_HOUR_PREF, hour)
+        editor.putInt(NOTIF_MINUTE_PREF, minute)
         editor.apply()
     }
 
-    fun getNotificationTime(): Int {
+    fun getNotificationHour(): Int {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        Log.d("NotifTime", "Time: ${sharedPreferences.getInt(NOTIF_TIME_PREF, 8)}")
-        return sharedPreferences.getInt(NOTIF_TIME_PREF, 8)
+        return sharedPreferences.getInt(NOTIF_HOUR_PREF, 8)
+    }
+
+    fun getNotificationMinute(): Int {
+        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return sharedPreferences.getInt(NOTIF_MINUTE_PREF, 0)
     }
 }
