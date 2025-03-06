@@ -18,7 +18,7 @@ data class DataPoint @JsonCreator constructor(
             return dataPoints.toList()
         }
 
-        fun toNotificationMessage(dataPoints: List<DataPoint>): String {
+        fun listToNotificationMessage(dataPoints: List<DataPoint>): String {
             val builder = StringBuilder()
             for (dataPoint in dataPoints) {
                 builder.append("${dataPoint.name}: ${dataPoint.value}\n")

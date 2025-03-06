@@ -59,7 +59,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Config.loadConfig(applicationContext)
         createNotificationChannel()
-        //createWorkRequest(preferences.getNotifTime(), 24)
         notificationScheduler.scheduleNotification(preferences.getNotificationHour(), preferences.getNotificationMinute())
 
         setContent {

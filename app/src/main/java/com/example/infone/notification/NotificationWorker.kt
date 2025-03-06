@@ -24,7 +24,7 @@ class NotificationWorker(context: Context, workerParams: WorkerParameters) : Wor
     }
 
     private fun showNotification(dataPoints: List<DataPoint>) {
-        val notificationMessage = DataPoint.toNotificationMessage(dataPoints)
+        val notificationMessage = DataPoint.listToNotificationMessage(dataPoints)
         val notificationManager = NotificationManagerCompat.from(applicationContext)
 
         val notification = NotificationCompat.Builder(applicationContext, "Notification_Channel")

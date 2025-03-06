@@ -59,4 +59,8 @@ class Preferences(private val context: Context) {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         return sharedPreferences.getInt(NOTIF_MINUTE_PREF, 0)
     }
+
+    fun getNotificationTime(): Pair<Int, Int> {
+        return Pair(getNotificationHour(), getNotificationMinute())
+    }
 }
