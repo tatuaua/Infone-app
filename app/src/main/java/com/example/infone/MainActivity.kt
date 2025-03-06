@@ -43,60 +43,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkRequest
-import com.example.infone.model.Config
+import com.example.infone.data.local.Preferences
+import com.example.infone.data.remote.RequestHelper
 import com.example.infone.model.DataPoint
-import com.example.infone.model.Preferences
-import com.example.infone.notification.NotificationWorker
+import com.example.infone.notification.NotificationScheduler
+import com.example.infone.utils.Config
 import java.util.Calendar
-import java.util.UUID
-import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
 
     private val preferences: Preferences by lazy { Preferences(applicationContext) }
-    private var workId: UUID = UUID.randomUUID()
+    private val notificationScheduler by lazy { NotificationScheduler(applicationContext) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Config.loadConfig(applicationContext)
         createNotificationChannel()
-        createWorkRequest(preferences.getNotifTime(), 24)
+        //createWorkRequest(preferences.getNotifTime(), 24)
+        notificationScheduler.scheduleNotification(preferences.getNotificationTime(), 0)
 
         setContent {
             AppUI()
         }
     }
-
-    private fun createWorkRequest(hour: Int, minute: Int) {
-        val calendar = Calendar.getInstance()
-        val now = calendar.timeInMillis
-
-        calendar.set(Calendar.HOUR_OF_DAY, hour)
-        calendar.set(Calendar.MINUTE, minute)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-
-        if (calendar.timeInMillis <= now) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
-        }
-
-        val initialDelay = calendar.timeInMillis - now
-
-        workId = UUID.randomUUID()
-
-        val notificationWorkRequest: WorkRequest = PeriodicWorkRequestBuilder<NotificationWorker>(24, TimeUnit.HOURS)
-            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS) // Start at next 8 AM
-            .setId(workId)
-            .build()
-
-        WorkManager.getInstance(this).enqueue(notificationWorkRequest)
-
-        Log.d("MainActivity", "Work request created with ID: $workId, time: $hour:$minute")
-    }
-
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -194,15 +163,16 @@ class MainActivity : ComponentActivity() {
                 val calendar = Calendar.getInstance()
                 val timePickerDialog = TimePickerDialog(
                     context,
-                    { _, hourOfDay, minute ->
+                    { _, hour, minute ->
                         showTimePicker = false
-                        val newTime = String.format("%02d:%02d", hourOfDay, minute)
+                        val newTime = String.format("%02d:%02d", hour, minute)
                         if (selectedTime != newTime) {
                             selectedTime = newTime
                             Log.d("MainActivity", "New time selected: $newTime")
-                            preferences.saveNotifTime(hourOfDay)
-                            WorkManager.getInstance(context).cancelWorkById(workId)
-                            createWorkRequest(hourOfDay, minute)
+                            preferences.saveNotificationTime(hour)
+                            //WorkManager.getInstance(context).cancelWorkById(workId)
+                            //createWorkRequest(hourOfDay, minute)
+                            notificationScheduler.rescheduleNotification(hour, minute)
                         } else {
                             Log.d("MainActivity", "Time not changed")
                         }

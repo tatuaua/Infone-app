@@ -1,4 +1,4 @@
-package com.example.infone
+package com.example.infone.data.remote
 
 import android.util.Log
 import com.example.infone.model.DataPoint
@@ -33,5 +33,4 @@ class RequestHelper {
             }
         }
     }
-
 }

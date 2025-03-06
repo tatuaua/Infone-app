@@ -1,4 +1,4 @@
-package com.example.infone.model
+package com.example.infone.data.local
 
 import android.content.Context
 import android.util.Log
@@ -10,13 +10,6 @@ class Preferences(private val context: Context) {
         const val PREFS_NAME = "InfonePrefs"
         const val IDS_PREF = "InfoneIds"
         const val NOTIF_TIME_PREF = "InfoneTime"
-    }
-
-    fun saveIds(ids: List<Int>) {
-        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putStringSet(IDS_PREF, ids.map { it.toString() }.toSet())
-        editor.apply()
     }
 
     fun addId(id: Int) {
@@ -47,7 +40,7 @@ class Preferences(private val context: Context) {
         return ids.map { it.toInt() }
     }
 
-    fun saveNotifTime(time: Int) {
+    fun saveNotificationTime(time: Int) {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         WorkManager.getInstance(context).cancelAllWork()
@@ -55,7 +48,7 @@ class Preferences(private val context: Context) {
         editor.apply()
     }
 
-    fun getNotifTime(): Int {
+    fun getNotificationTime(): Int {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         Log.d("NotifTime", "Time: ${sharedPreferences.getInt(NOTIF_TIME_PREF, 8)}")
         return sharedPreferences.getInt(NOTIF_TIME_PREF, 8)

@@ -1,4 +1,4 @@
-package com.example.infone.model
+package com.example.infone.utils
 
 import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper

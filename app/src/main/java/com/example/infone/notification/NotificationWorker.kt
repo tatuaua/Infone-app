@@ -5,10 +5,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.example.infone.RequestHelper
-import com.example.infone.model.Config
+import com.example.infone.data.remote.RequestHelper
+import com.example.infone.utils.Config
 import com.example.infone.model.DataPoint
-import com.example.infone.model.Preferences
+import com.example.infone.data.local.Preferences
 import kotlinx.coroutines.runBlocking
 
 class NotificationWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
