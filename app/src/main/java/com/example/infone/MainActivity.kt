@@ -30,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -86,7 +85,6 @@ class MainActivity : ComponentActivity() {
         val context = LocalContext.current
         var showTimePicker by remember { mutableStateOf(false) }
         var selectedTime by remember { mutableStateOf("Not set") }
-        var selectedCount by remember { mutableIntStateOf(0) }
 
         LaunchedEffect(Unit) {
             val savedIds = preferences.getIds().toSet()
@@ -126,11 +124,9 @@ class MainActivity : ComponentActivity() {
                                 if (isChecked) {
                                     Log.d("MainActivity", "Adding ID: ${dataPoint.id}")
                                     preferences.addId(dataPoint.id)
-                                    selectedCount++
                                 } else {
                                     Log.d("MainActivity", "Removing ID: ${dataPoint.id}")
                                     preferences.removeId(dataPoint.id)
-                                    selectedCount--
                                 }
                             },
                             colors = CheckboxDefaults.colors(checkedColor = accentColor, uncheckedColor = textColor)
