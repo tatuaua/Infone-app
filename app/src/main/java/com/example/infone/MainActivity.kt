@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(Unit) {
             val savedIds = preferences.getIds().toSet()
-            val data = RequestHelper().fetchDataPoints(Config.url + "/datapoints")
+            val data = RequestHelper().fetchDataPoints(Config.getURL() + "/datapoints")
             dataPoints.clear()
             dataPoints.addAll(data)
             data.forEach { selectedItems[it.id] = it.id in savedIds }

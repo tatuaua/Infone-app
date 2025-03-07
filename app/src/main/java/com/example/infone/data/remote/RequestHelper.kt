@@ -2,6 +2,7 @@ package com.example.infone.data.remote
 
 import android.util.Log
 import com.example.infone.model.DataPoint
+import com.example.infone.utils.Config
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -14,6 +15,7 @@ class RequestHelper {
                 val client = OkHttpClient()
                 val request = Request.Builder()
                     .url(url)
+                    .header("X-API-KEY", Config.getApiKey())
                     .build()
 
                 val response = client.newCall(request).execute()

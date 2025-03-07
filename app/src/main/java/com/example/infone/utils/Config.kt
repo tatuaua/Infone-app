@@ -4,12 +4,23 @@ import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 
 object Config {
-    var url: String = ""
+
+    private var url: String? = null
+    private var apiKey: String? = null
 
     fun loadConfig(context: Context) {
         val fileName = "config.json"
         val fileContent = context.assets.open(fileName).bufferedReader().use { it.readText() }
-        val config = ObjectMapper().readValue(fileContent, Config::class.java)
-        this.url = config.url
+        val jsonObject = ObjectMapper().readTree(fileContent)
+        this.url = jsonObject.get("url").asText()
+        this.apiKey = jsonObject.get("apiKey").asText()
+    }
+
+    fun getURL(): String {
+        return url ?: throw IllegalStateException("URL not set")
+    }
+
+    fun getApiKey(): String {
+        return apiKey ?: throw IllegalStateException("API key not set")
     }
 }

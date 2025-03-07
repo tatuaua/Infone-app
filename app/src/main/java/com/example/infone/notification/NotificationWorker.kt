@@ -17,7 +17,7 @@ class NotificationWorker(context: Context, workerParams: WorkerParameters) : Wor
 
     override fun doWork(): Result {
         return runBlocking {
-            val dataPoints = RequestHelper().fetchDataPoints(Config.url + "/datapoints" + preferences.getIds().joinToString(",", prefix = "/", postfix = ""))
+            val dataPoints = RequestHelper().fetchDataPoints(Config.getURL() + "/datapoints" + preferences.getIds().joinToString(",", prefix = "/", postfix = ""))
             showNotification(dataPoints)
             Result.success()
         }
