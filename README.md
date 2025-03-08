@@ -1,4 +1,4 @@
-# Infone
+![logo](app/src/main/res/drawable/infone_logo.png)
 
 Infone is a simple application that sends small data points to the user everyday in the form of a notification. 
 A user can choose which data points they want to receive and at what time they want to receive them.
