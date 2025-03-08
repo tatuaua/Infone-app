@@ -22,7 +22,8 @@ A user can choose which data points they want to receive and at what time they w
 - [x] Create a basic structure for the app
 - [x] Create notification system
 - [x] Create preferences system
-- [ ] Improve app UI
+- [x] Improve app UI
+- [ ] Add popup for new time selected
 - [ ] Improve notification layout
 - [ ] Add way to request new data points
 - [ ] Add way to search data points

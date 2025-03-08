@@ -1,15 +1,18 @@
 package com.example.infone
 
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.TimePickerDialog
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,19 +20,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,16 +49,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.infone.data.local.Preferences
 import com.example.infone.data.remote.RequestHelper
 import com.example.infone.model.DataPoint
 import com.example.infone.notification.NotificationScheduler
 import com.example.infone.utils.Config
-import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
 
@@ -59,7 +73,7 @@ class MainActivity : ComponentActivity() {
         Config.loadConfig(applicationContext)
         createNotificationChannel()
         notificationScheduler.scheduleNotification(preferences.getNotificationHour(), preferences.getNotificationMinute())
-
+        enableEdgeToEdge()
         setContent {
             AppUI()
         }
@@ -77,7 +91,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @SuppressLint("DefaultLocale")
     @Composable
     fun AppUI() {
         val dataPoints = remember { mutableStateListOf<DataPoint>() }
@@ -95,8 +108,10 @@ class MainActivity : ComponentActivity() {
         }
 
         val backgroundColor = Color(0xFF121212)
-        val textColor = Color(0xFFE0E0E0)
+        val textColor = Color(0xFFA4A4A4)
         val accentColor = Color(0xFFBB86FC)
+        val raleway = FontFamily(Font(R.font.raleway_variablefont_wghtt))
+        val logoBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.infone_logo)
 
         Column(
             modifier = Modifier
@@ -106,9 +121,12 @@ class MainActivity : ComponentActivity() {
                 .systemBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(text = "Infone", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = textColor)
-            Spacer(modifier = Modifier.height(12.dp))
+            Icon(
+                bitmap = logoBitmap.asImageBitmap(),
+                contentDescription = "Infone Logo",
+                tint = Color.Unspecified, // Fixed from previous issue
+                modifier = Modifier.size(130.dp)
+            )
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(dataPoints) { dataPoint ->
                     Row(
@@ -116,10 +134,23 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 6.dp, horizontal = 8.dp)
-                    ) {
-                        Checkbox(
-                            checked = selectedItems[dataPoint.id] ?: false,
-                            onCheckedChange = { isChecked ->
+                            .background(
+                                color = if (selectedItems[dataPoint.id] == true) accentColor.copy(alpha = 0.2f) else Color.Transparent,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .then(
+                                if (selectedItems[dataPoint.id] != true) {
+                                    Modifier.border(
+                                        width = 1.dp,
+                                        color = accentColor.copy(alpha = 0.5f),
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                } else {
+                                    Modifier
+                                }
+                            )
+                            .clickable {
+                                val isChecked = selectedItems[dataPoint.id] != true
                                 selectedItems[dataPoint.id] = isChecked
                                 if (isChecked) {
                                     Log.d("MainActivity", "Adding ID: ${dataPoint.id}")
@@ -128,10 +159,32 @@ class MainActivity : ComponentActivity() {
                                     Log.d("MainActivity", "Removing ID: ${dataPoint.id}")
                                     preferences.removeId(dataPoint.id)
                                 }
-                            },
-                            colors = CheckboxDefaults.colors(checkedColor = accentColor, uncheckedColor = textColor)
+                            }
+                            .padding(16.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = dataPoint.name,
+                                fontSize = 16.sp,
+                                fontFamily = raleway,
+                                fontWeight = FontWeight.Bold,
+                                color = if (selectedItems[dataPoint.id] == true) accentColor else textColor
+                            )
+                            Text(
+                                text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                fontSize = 12.sp,
+                                fontFamily = raleway,
+                                fontWeight = FontWeight.Normal,
+                                color = if (selectedItems[dataPoint.id] == true) accentColor.copy(alpha = 0.7f) else textColor.copy(alpha = 0.7f),
+                                lineHeight = 14.sp
+                            )
+                        }
+                        Icon(
+                            imageVector = if (selectedItems[dataPoint.id] == true) Icons.Default.Check else Icons.Default.Close,
+                            contentDescription = "Enabled state",
+                            tint = if (selectedItems[dataPoint.id] == true) accentColor else textColor,
+                            modifier = Modifier.size(24.dp)
                         )
-                        Text(text = dataPoint.name, fontSize = 16.sp, color = textColor, modifier = Modifier.padding(start = 8.dp))
                     }
                 }
             }
@@ -142,10 +195,7 @@ class MainActivity : ComponentActivity() {
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                IconButton(
-                    onClick = { showTimePicker = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                IconButton(onClick = { showTimePicker = true }, modifier = Modifier.fillMaxWidth()) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
                         contentDescription = "Choose Notification Time",
@@ -154,36 +204,156 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            // Custom Time Picker Dialog
             if (showTimePicker) {
-                val calendar = Calendar.getInstance()
-                val timePickerDialog = TimePickerDialog(
-                    context,
-                    { _, hour, minute ->
+                CustomTimePickerDialog(
+                    initialHour = preferences.getNotificationHour(),
+                    initialMinute = preferences.getNotificationMinute(),
+                    backgroundColor = backgroundColor,
+                    textColor = textColor,
+                    accentColor = accentColor,
+                    fontFamily = raleway,
+                    onDismiss = { showTimePicker = false },
+                    onTimeSelected = { hour, minute ->
                         showTimePicker = false
                         val newTime = String.format("%02d:%02d", hour, minute)
                         if (selectedTime != newTime) {
                             selectedTime = newTime
                             Log.d("MainActivity", "New time selected: $newTime")
                             preferences.saveNotificationTime(hour, minute)
-                            //WorkManager.getInstance(context).cancelWorkById(workId)
-                            //createWorkRequest(hourOfDay, minute)
                             notificationScheduler.rescheduleNotification(hour, minute)
                         } else {
                             Log.d("MainActivity", "Time not changed")
                         }
-                    },
-                    calendar.get(Calendar.HOUR_OF_DAY),
-                    calendar.get(Calendar.MINUTE),
-                    true
+                    }
                 )
-
-                timePickerDialog.setOnCancelListener {
-                    showTimePicker = false
-                    Log.d("MainActivity", "Time picker canceled")
-                }
-                timePickerDialog.show()
             }
         }
     }
 
+    @Composable
+    fun CustomTimePickerDialog(
+        initialHour: Int,
+        initialMinute: Int,
+        backgroundColor: Color,
+        textColor: Color,
+        accentColor: Color,
+        fontFamily: FontFamily,
+        onDismiss: () -> Unit,
+        onTimeSelected: (Int, Int) -> Unit
+    ) {
+        var hour by remember { mutableIntStateOf(initialHour) }
+        var minute by remember { mutableIntStateOf(initialMinute) }
+
+        Dialog(onDismissRequest = onDismiss) {
+            Surface(
+                modifier = Modifier
+                    .width(300.dp)
+                    .background(backgroundColor, RoundedCornerShape(16.dp)),
+                color = backgroundColor,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Set Notification Time",
+                        fontFamily = fontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = textColor
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Hour Picker
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            IconButton(onClick = { hour = (hour + 1) % 24 }) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowUp,
+                                    contentDescription = "Increase hour",
+                                    tint = accentColor
+                                )
+                            }
+                            Text(
+                                text = String.format("%02d", hour),
+                                fontFamily = fontFamily,
+                                fontSize = 32.sp,
+                                color = accentColor
+                            )
+                            IconButton(onClick = { hour = if (hour - 1 < 0) 23 else hour - 1 }) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = "Decrease hour",
+                                    tint = accentColor
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = ":",
+                            fontFamily = fontFamily,
+                            fontSize = 32.sp,
+                            color = textColor
+                        )
+
+                        // Minute Picker
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            IconButton(onClick = { minute = (minute + 1) % 60 }) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowUp,
+                                    contentDescription = "Increase minute",
+                                    tint = accentColor
+                                )
+                            }
+                            Text(
+                                text = String.format("%02d", minute),
+                                fontFamily = fontFamily,
+                                fontSize = 32.sp,
+                                color = accentColor
+                            )
+                            IconButton(onClick = { minute = if (minute - 1 < 0) 59 else minute - 1 }) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = "Decrease minute",
+                                    tint = accentColor
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        TextButton(onClick = onDismiss) {
+                            Text(
+                                text = "Cancel",
+                                fontFamily = fontFamily,
+                                fontSize = 16.sp,
+                                color = textColor
+                            )
+                        }
+                        TextButton(onClick = { onTimeSelected(hour, minute) }) {
+                            Text(
+                                text = "Set",
+                                fontFamily = fontFamily,
+                                fontSize = 16.sp,
+                                color = accentColor
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
