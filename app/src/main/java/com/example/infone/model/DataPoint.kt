@@ -8,7 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 data class DataPoint @JsonCreator constructor(
     @JsonProperty("id") val id: Int,
     @JsonProperty("name") val name: String,
-    @JsonProperty("value") val value: String
+    @JsonProperty("value") val value: String,
+    @JsonProperty("description") val description: String
 ){
     companion object {
         fun listFromJson(json: String): List<DataPoint> {

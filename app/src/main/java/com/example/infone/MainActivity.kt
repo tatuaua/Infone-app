@@ -171,7 +171,7 @@ class MainActivity : ComponentActivity() {
                                 color = if (selectedItems[dataPoint.id] == true) accentColor else textColor
                             )
                             Text(
-                                text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                text = dataPoint.description,
                                 fontSize = 12.sp,
                                 fontFamily = raleway,
                                 fontWeight = FontWeight.Normal,
