@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -89,6 +90,7 @@ class MainActivity : ComponentActivity() {
         val context = LocalContext.current
         var showTimePicker by remember { mutableStateOf(false) }
         var selectedTime by remember { mutableStateOf("Not set") }
+        var showSelectedTimeSnackbar by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
             val savedIds = preferences.getIds().toSet()
@@ -206,6 +208,7 @@ class MainActivity : ComponentActivity() {
                     fontFamily = raleway,
                     onDismiss = { showTimePicker = false },
                     onTimeSelected = { hour, minute ->
+                        showSelectedTimeSnackbar = true
                         showTimePicker = false
                         val newTime = String.format("%02d:%02d", hour, minute)
                         if (selectedTime != newTime) {
@@ -218,6 +221,22 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 )
+            }
+
+            if(showSelectedTimeSnackbar) {
+                Snackbar {
+                    Text(
+                        text = "Notification time set to $selectedTime",
+                        color = accentColor,
+                        fontFamily = raleway,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                // wait for 2 seconds before hiding the snackbar
+                LaunchedEffect(Unit) {
+                    kotlinx.coroutines.delay(2000)
+                    showSelectedTimeSnackbar = false
+                }
             }
         }
     }
