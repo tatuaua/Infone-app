@@ -24,9 +24,9 @@ A user can choose which data points they want to receive and at what time they w
 - [x] Create preferences system
 - [x] Improve app UI
 - [x] Add popup for new time selected
+- [x] Add way to search data points
 - [ ] Improve notification layout
 - [ ] Add way to request new data points
-- [ ] Add way to search data points
 
 ## See also
 Backend: https://github.com/tatuaua/infone-backend
