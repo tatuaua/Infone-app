@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Snackbar
@@ -41,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -52,6 +52,7 @@ import com.example.infone.data.local.Preferences
 import com.example.infone.data.remote.RequestHelper
 import com.example.infone.model.DataPoint
 import com.example.infone.notification.NotificationScheduler
+import com.example.infone.ui.CustomSearchBar
 import com.example.infone.ui.CustomTimePickerDialog
 import com.example.infone.utils.Config
 
@@ -87,17 +88,29 @@ class MainActivity : ComponentActivity() {
     fun AppUI() {
         val dataPoints = remember { mutableStateListOf<DataPoint>() }
         val selectedItems = remember { mutableStateMapOf<Int, Boolean>() }
+        val visibleItems = remember { mutableStateMapOf<Int, Boolean>() }
         val context = LocalContext.current
         var showTimePicker by remember { mutableStateOf(false) }
         var selectedTime by remember { mutableStateOf("Not set") }
         var showSelectedTimeSnackbar by remember { mutableStateOf(false) }
+        var searchText by remember { mutableStateOf("") }
 
         LaunchedEffect(Unit) {
             val savedIds = preferences.getIds().toSet()
             val data = RequestHelper().fetchDataPoints(Config.getURL() + "/datapoints")
             dataPoints.clear()
             dataPoints.addAll(data)
-            data.forEach { selectedItems[it.id] = it.id in savedIds }
+            data.forEach {
+                selectedItems[it.id] = it.id in savedIds
+                visibleItems[it.id] = true
+            }
+        }
+
+        // Update visible items when search text changes
+        LaunchedEffect(searchText) {
+            dataPoints.forEach { dataPoint ->
+                visibleItems[dataPoint.id] = dataPoint.name.contains(searchText, ignoreCase = true)
+            }
         }
 
         val backgroundColor = Color(0xFF121212)
@@ -114,14 +127,30 @@ class MainActivity : ComponentActivity() {
                 .systemBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
+            /*Icon(
                 bitmap = logoBitmap.asImageBitmap(),
                 contentDescription = "Infone Logo",
-                tint = Color.Unspecified, // Fixed from previous issue
+                tint = Color.Unspecified,
                 modifier = Modifier.size(130.dp)
+            )*/
+
+            CustomSearchBar(
+                searchText = searchText,
+                onSearchTextChanged = { newText -> searchText = newText },
+                backgroundColor = backgroundColor,
+                textColor = textColor,
+                accentColor = accentColor,
+                fontFamily = raleway
             )
+
+            HorizontalDivider(
+                color = textColor.copy(alpha = 0.3f),
+                thickness = 1.dp,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 8.dp)
+            )
+
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(dataPoints) { dataPoint ->
+                items(dataPoints.filter { visibleItems[it.id] == true }) { dataPoint ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -197,7 +226,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            // Custom Time Picker Dialog
             if (showTimePicker) {
                 CustomTimePickerDialog(
                     initialHour = preferences.getNotificationHour(),
@@ -232,7 +260,6 @@ class MainActivity : ComponentActivity() {
                         fontWeight = FontWeight.Bold,
                     )
                 }
-                // wait for 2 seconds before hiding the snackbar
                 LaunchedEffect(Unit) {
                     kotlinx.coroutines.delay(2000)
                     showSelectedTimeSnackbar = false
